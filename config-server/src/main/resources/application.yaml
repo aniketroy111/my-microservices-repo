@@ -10,7 +10,7 @@ spring:
     config:
       server:
         native:
-          search-locations: file:///C:\Users\devil\OneDrive\Desktop\config-repo
+          search-locations: file:///C:\Users\devil\OneDrive\Desktop\my-microservices-repo\config-repo
 
 eureka:
   client:
