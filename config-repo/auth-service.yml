@@ -1,0 +1,70 @@
+# ===============================
+# Server Configuration
+# ===============================
+server:
+  port: 8084  # Auth Service will run on port 8084
+
+# ===============================
+# Spring Application Configuration
+# ===============================
+spring:
+  application:
+    name: auth-service  # Service name registered in Eureka
+
+  # ===============================
+  # Database Configuration (MySQL)
+  # ===============================
+  datasource:
+    url: jdbc:mysql://localhost:3306/auth_service_db  # MySQL database URL
+    username: root  # MySQL username
+    password: 1234  # MySQL password
+
+  # ===============================
+  # JPA / Hibernate Configuration
+  # ===============================
+  jpa:
+    hibernate:
+      ddl-auto: update  # Auto-updates DB schema based on entities
+    show-sql: true      # Prints SQL queries in console (debugging purpose)
+
+# ===============================
+# Eureka Client Configuration
+# ===============================
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka  # Eureka server URL
+
+# ===============================
+# Actuator Configuration
+# ===============================
+management:
+  endpoint:
+    gateway:
+      enabled: true  # Enables gateway actuator endpoint
+
+  endpoints:
+    web:
+      exposure:
+        include: health,info,refresh  # Exposes only health + info endpoints
+
+  tracing:
+    sampling:
+      probability: 1.0  # Enables full tracing (good for debugging + centralized logs)
+
+
+# ===============================
+# Swagger / OpenAPI Configuration
+# ===============================
+springdoc:
+  api-docs:
+    path: /v3/api-docs  # Endpoint for OpenAPI docs JSON
+  swagger-ui:
+    path: /swagger-ui.html  # Swagger UI access path
+
+# ===============================
+# JWT Configuration
+# ===============================
+jwt:
+  secret: MySuperSecretKeyForJwtGeneration1234567890  # Secret key used to sign JWT tokens
+  expirationMs: 86400000  # Token expiration time in milliseconds (24 hours)

@@ -1,0 +1,147 @@
+# ===============================
+# Server Configuration
+# ===============================
+server:
+  port: 8080  # API Gateway will run on port 8080
+
+# ===============================
+# Spring Application Configuration
+# ===============================
+spring:
+  application:
+    name: api-gateway  # Name shown in Eureka + logs
+
+  main:
+    web-application-type: reactive  # Required for Spring Cloud Gateway (WebFlux)
+
+  # ===============================
+  # Redis Configuration (Used for Rate Limiting)
+  # ===============================
+  data:
+    redis:
+      host: localhost  # Redis host
+      port: 6379       # Redis port
+
+  # ===============================
+  # Spring Cloud Gateway Routes Configuration
+  # ===============================
+  cloud:
+    gateway:
+      routes:
+        # -------------------------------
+        # Main Service Routes
+        # -------------------------------
+        - id: user-route
+          uri: lb://USER-SERVICE  # Load-balanced route via Eureka
+          predicates:
+            - Path=/users/**
+
+        - id: product-route
+          uri: lb://PRODUCT-SERVICE
+          predicates:
+            - Path=/products/**
+
+        - id: order-route
+          uri: lb://ORDER-SERVICE
+          predicates:
+            - Path=/orders/**
+          filters:
+            # -------------------------------
+            # Rate Limiting for Order Service
+            # -------------------------------
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter:
+                  replenishRate: 1   # Requests allowed per second
+                  burstCapacity: 1   # Maximum burst limit
+                key-resolver: "#{@userKeyResolver}"  # Resolver bean used to identify user/IP
+
+        - id: auth-route
+          uri: lb://AUTH-SERVICE
+          predicates:
+            - Path=/auth/**
+
+        # -------------------------------
+        # Swagger Docs Routes (Microservices)
+        # -------------------------------
+        - id: user-swagger-docs
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/user-service/v3/api-docs/**
+          filters:
+            - StripPrefix=1  # Removes "/user-service" before forwarding
+
+        - id: product-swagger-docs
+          uri: lb://PRODUCT-SERVICE
+          predicates:
+            - Path=/product-service/v3/api-docs/**
+          filters:
+            - StripPrefix=1
+
+        - id: order-swagger-docs
+          uri: lb://ORDER-SERVICE
+          predicates:
+            - Path=/order-service/v3/api-docs/**
+          filters:
+            - StripPrefix=1
+
+        - id: auth-swagger-docs
+          uri: lb://AUTH-SERVICE
+          predicates:
+            - Path=/auth-service/v3/api-docs/**
+          filters:
+            - StripPrefix=1
+
+# ===============================
+# Eureka Client Configuration
+# ===============================
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka  # Eureka server URL
+
+# ===============================
+# Actuator Configuration
+# ===============================
+management:
+  endpoint:
+    gateway:
+      enabled: true  # Enables gateway actuator endpoint
+
+  endpoints:
+    web:
+      exposure:
+        include: health,info,refresh  # Exposes only health + info endpoints
+
+  tracing:
+    sampling:
+      probability: 1.0  # Enables full tracing (good for debugging + centralized logs)
+
+# ===============================
+# Swagger UI Configuration (Single UI from API Gateway)
+# ===============================
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html  # Gateway Swagger UI URL
+
+    urls:
+      - name: User Service
+        url: /user-service/v3/api-docs
+
+      - name: Product Service
+        url: /product-service/v3/api-docs
+
+      - name: Order Service
+        url: /order-service/v3/api-docs
+
+      - name: Auth Service
+        url: /auth-service/v3/api-docs
+
+# ===============================
+# JWT Configuration
+# ===============================
+jwt:
+  secret: MySuperSecretKeyForJwtGeneration1234567890  # Secret key for signing JWT tokens
+
+app:
+  message: "Product service v2"

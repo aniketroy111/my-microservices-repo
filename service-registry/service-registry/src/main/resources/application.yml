@@ -1,0 +1,20 @@
+# ===============================
+# Server Configuration
+# ===============================
+server:
+  port: 8761  # Runs the application on port 8761 (Eureka default)
+
+# ===============================
+# Spring Application Configuration
+# ===============================
+spring:
+  application:
+    name: service-registry  # Name of the application (shown in Eureka dashboard)
+
+# ===============================
+# Eureka Server Configuration
+# ===============================
+eureka:
+  client:
+    register-with-eureka: false  # Eureka server should NOT register itself
+    fetch-registry: false        # Eureka server should NOT fetch registry from other servers

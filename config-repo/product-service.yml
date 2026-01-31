@@ -1,0 +1,58 @@
+# ===============================
+# Server Configuration
+# ===============================
+server:
+  port: 8082  # Product Service will run on port 8082
+
+# ===============================
+# Spring Application Configuration
+# ===============================
+spring:
+  application:
+    name: product-service  # Service name used in Eureka
+
+  # ===============================
+  # Database Configuration (MySQL)
+  # ===============================
+  datasource:
+    url: jdbc:mysql://localhost:3306/product_service_db  # MySQL database URL
+    username: root  # MySQL username
+    password: 1234  # MySQL password
+
+  # ===============================
+  # JPA / Hibernate Configuration
+  # ===============================
+  jpa:
+    hibernate:
+      ddl-auto: update  # Automatically updates DB schema based on entities
+    show-sql: true      # Shows SQL queries in the console (useful for debugging)
+
+# ===============================
+# Swagger / OpenAPI Configuration
+# ===============================
+springdoc:
+  api-docs:
+    path: /v3/api-docs  # Endpoint for OpenAPI JSON docs
+  swagger-ui:
+    path: /swagger-ui.html  # Swagger UI URL
+
+# ===============================
+# Eureka Client Configuration
+# ===============================
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka  # Eureka server URL
+
+# ===============================
+# Actuator + Tracing Configuration
+# ===============================
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,refresh  # Exposes only health + info endpoints
+
+  tracing:
+    sampling:
+      probability: 1.0  # Enables full tracing (useful for centralized logging + trace id)
