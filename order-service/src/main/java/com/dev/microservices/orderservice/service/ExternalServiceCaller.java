@@ -1,11 +1,14 @@
 package com.dev.microservices.orderservice.service;
 
 
+import com.dev.microservices.orderservice.client.InventoryServiceClient;
 import com.dev.microservices.orderservice.client.ProductServiceClient;
 import com.dev.microservices.orderservice.client.UserServiceClient;
 import com.dev.microservices.orderservice.dto.external.ApiResponseWrapper;
+import com.dev.microservices.orderservice.dto.external.InventoryRequest;
 import com.dev.microservices.orderservice.dto.external.ProductResponseDTO;
 import com.dev.microservices.orderservice.dto.external.UserResponseDTO;
+import com.dev.microservices.orderservice.exception.InventoryServiceUnavailableException;
 import com.dev.microservices.orderservice.exception.ProductServiceUnavailableException;
 import com.dev.microservices.orderservice.exception.UserServiceUnavailableException;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
@@ -17,11 +20,13 @@ public class ExternalServiceCaller {
 
     private final UserServiceClient userServiceClient;
     private final ProductServiceClient productServiceClient;
+    private final InventoryServiceClient inventoryServiceClient;
 
     public ExternalServiceCaller(UserServiceClient userServiceClient,
-                                 ProductServiceClient productServiceClient) {
+                                 ProductServiceClient productServiceClient, InventoryServiceClient inventoryServiceClient) {
         this.userServiceClient = userServiceClient;
         this.productServiceClient = productServiceClient;
+        this.inventoryServiceClient = inventoryServiceClient;
     }
 
     @Retry(name = "userService")
@@ -55,4 +60,20 @@ public class ExternalServiceCaller {
     public ProductResponseDTO productFallback(Long productId, Throwable ex) {
         throw new ProductServiceUnavailableException("Product-Service is down. Please try again later.");
     }
+
+    @Retry(name = "inventoryService")
+    @CircuitBreaker(name = "inventoryService", fallbackMethod = "inventoryFallback")
+    public void reduceInventory(Long productId, Integer quantity) {
+
+        InventoryRequest request = new InventoryRequest();
+        request.setProductId(productId);
+        request.setQuantity(quantity);
+
+        inventoryServiceClient.reduceStock(request);
+    }
+
+    public void inventoryFallback(Long productId,Integer quantity, Throwable ex) {
+        throw new InventoryServiceUnavailableException("Inventory-Service is down. Please try again later.");
+    }
+
 }

@@ -1,6 +1,6 @@
 plugins {
 	id 'java'
-	id 'org.springframework.boot' version '4.0.2'
+	id 'org.springframework.boot' version '3.3.4'
 	id 'io.spring.dependency-management' version '1.1.7'
 }
 
@@ -19,20 +19,34 @@ repositories {
 }
 
 ext {
-	set('springCloudVersion', "2025.1.0")
+	set('springCloudVersion', "2023.0.3")
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	implementation 'org.springframework.boot:spring-boot-starter-webmvc'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	// for connect to eureka server
 	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+	// for feign client service to connect with other service and call the api of other service
 	implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+	// this is for validation
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	// this is for swagger ui api list
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0'
+	// this is for circuit breaker if other server is down then it handle it
+	implementation 'org.springframework.cloud:spring-cloud-starter-circuitbreaker-resilience4j'
+	// for centralized logging + trace id
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	implementation 'io.micrometer:micrometer-tracing-bridge-brave'
+	implementation 'io.zipkin.reporter2:zipkin-reporter-brave'
+	// this is for config server
+	implementation 'org.springframework.cloud:spring-cloud-starter-config'
+
+
+	//
+	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'com.mysql:mysql-connector-j'
-	testImplementation 'org.springframework.boot:spring-boot-starter-actuator-test'
-	testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'
-	testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	annotationProcessor 'org.projectlombok:lombok'
 }
 
 dependencyManagement {

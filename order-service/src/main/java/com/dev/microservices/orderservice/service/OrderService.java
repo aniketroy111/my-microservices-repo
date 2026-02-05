@@ -2,9 +2,6 @@ package com.dev.microservices.orderservice.service;
 
 
 import org.springframework.stereotype.Service;
-
-import com.dev.microservices.orderservice.client.ProductServiceClient;
-import com.dev.microservices.orderservice.client.UserServiceClient;
 import com.dev.microservices.orderservice.dto.OrderRequest;
 import com.dev.microservices.orderservice.dto.OrderResponse;
 import com.dev.microservices.orderservice.dto.external.ProductResponseDTO;
@@ -12,6 +9,7 @@ import com.dev.microservices.orderservice.dto.external.UserResponseDTO;
 import com.dev.microservices.orderservice.model.Order;
 import com.dev.microservices.orderservice.exception.InsufficientStockException;
 import com.dev.microservices.orderservice.repository.OrderRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 
 import java.time.LocalDateTime;
@@ -20,19 +18,14 @@ import java.time.LocalDateTime;
 public class OrderService {
 
     private final OrderRepository orderRepository;
-    private final UserServiceClient userServiceClient;
-    private final ProductServiceClient productServiceClient;
     private final ExternalServiceCaller externalServiceCaller;
 
-    public OrderService(OrderRepository orderRepository,
-                        UserServiceClient userServiceClient,
-                        ProductServiceClient productServiceClient, ExternalServiceCaller externalServiceCaller) {
+    public OrderService(OrderRepository orderRepository,ExternalServiceCaller externalServiceCaller) {
         this.orderRepository = orderRepository;
-        this.userServiceClient = userServiceClient;
-        this.productServiceClient = productServiceClient;
         this.externalServiceCaller = externalServiceCaller;
     }
 
+    @Transactional
     public OrderResponse placeOrder(OrderRequest request) {
 
         //1) Call User Service
@@ -51,7 +44,10 @@ public class OrderService {
         //4) totalPrice
         double totalPrice = product.getPrice() * request.getQuantity();
 
-        // 5) Save order
+        // 5) check inventory
+        externalServiceCaller.reduceInventory(request.getProductId(),request.getQuantity());
+
+        // 6) Save order
         Order saved = orderRepository.save(Order.builder()
                 .userId(request.getUserId())
                 .productId(request.getProductId())

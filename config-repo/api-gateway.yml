@@ -61,6 +61,10 @@ spring:
           predicates:
             - Path=/auth/**
 
+        - id: inventory-route
+          uri: lb://INVENTORY-SERVICE
+          predicates:
+            - Path=/inventory/**
         # -------------------------------
         # Swagger Docs Routes (Microservices)
         # -------------------------------
@@ -92,6 +96,12 @@ spring:
           filters:
             - StripPrefix=1
 
+        - id: inventory-swagger-docs
+          uri: lb://INVENTORY-SERVICE
+          predicates:
+            - Path=/inventory-service/v3/api-docs/**
+          filters:
+            - StripPrefix=1
 # ===============================
 # Eureka Client Configuration
 # ===============================

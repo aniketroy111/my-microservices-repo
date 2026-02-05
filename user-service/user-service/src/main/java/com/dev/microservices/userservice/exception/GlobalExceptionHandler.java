@@ -26,7 +26,7 @@ public class GlobalExceptionHandler {
     }
 
 
-    // ✅ Handles validation errors (@Valid)
+    // Handles validation errors (@Valid)
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResponse<Object>> handleValidationErrors(MethodArgumentNotValidException ex) {
 
@@ -39,7 +39,7 @@ public class GlobalExceptionHandler {
                 .body(build("Validation failed",errors));
     }
 
-    // ✅ Handles any unexpected error
+    // Handles any unexpected error
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Object>> handleGenericException(Exception ex) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
